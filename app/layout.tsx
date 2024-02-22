@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/menus/Navbar";
+import Sidebar from "@/components/menus/Sidebar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -15,11 +16,23 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const isLoggedIn = true;
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Navbar />
-        {children}
+        {isLoggedIn ? (
+          <div className="flex gap-5">
+            <aside className=" fixed top-0 z-50 w-20 h-screen max-h-screen overflow-hidden">
+              <Sidebar />
+            </aside>
+            {children}
+          </div>
+        ) : (
+          <>
+            <Navbar />
+            {children}
+          </>
+        )}
       </body>
     </html>
   );
