@@ -4,7 +4,7 @@ export default function layout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <>
-      <main className="w-full ml-20">
+      <main className='max-w-[1000px] my-10 mx-auto'>
         {children}
       </main>
     </>
