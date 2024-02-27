@@ -1,46 +1,34 @@
 "use client";
-
 import AuthButton from "@/components/buttons/AuthButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertContext } from "@/providers/alert-provider";
-import { User } from "@/types";
-import { emailSchema, nameSchema, passwordSchema } from "@/validation/user";
+import { emailSchema, passwordSchema } from "@/validation/user";
 import axios from "axios";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import React, { useContext, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import React, { useContext, useLayoutEffect, useState } from "react";
 import { z } from "zod";
 
 const defaultUserState = {
-  name: "",
   email: "",
   password: "",
 };
 
-const SignUpPage = () => {
-  const [errors, setErrors] = useState<User>(defaultUserState);
-  const [user, setUser] = useState<User>(defaultUserState);
+type SignInUser = {
+  email: string;
+  password: string;
+};
+
+const SignInPage = () => {
+  const [errors, setErrors] = useState<SignInUser>(defaultUserState);
+  const [user, setUser] = useState<SignInUser>(defaultUserState);
 
   const [loading, setLoading] = useState(false);
+
   const { setAlert } = useContext(AlertContext)!;
+
   const router = useRouter()
-
-  // handlers
-
-  const handleName = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUser((prev) => ({ ...prev, name: e.target.value }));
-    try {
-      const validateName = nameSchema.parse(e.target.value);
-      setErrors((prev) => ({ ...prev, name: "" }));
-    } catch (error: any) {
-      if (error instanceof z.ZodError) {
-        const validationError = error.errors[0].message;
-        setErrors((prev) => ({ ...prev, name: validationError }));
-        // Handle invalid name
-      }
-    }
-  };
 
   const handleEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUser((prev) => ({ ...prev, email: e.target.value }));
@@ -68,20 +56,34 @@ const SignUpPage = () => {
     }
   };
 
-  const submit = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const submit = async () => {
     try {
       setLoading(true);
-      const data = await axios.post("/api/auth/signup", {
-        ...user,
+      const { data } = await axios.post("/api/auth/signin", {
+        email: user.email,
+        password: user.password,
       });
+      console.log(data);
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          id: data?.id,
+          email: data?.email,
+          name: data?.name,
+          token: data?.token,
+        })
+      );
       setAlert(() => ({
         header: "Success.",
-        desc: "User created successfully.",
+        desc: "User logged in successfully.",
         variant: "success",
       }));
+      router.push(`/${data?.id}`)
     } catch (error: any) {
       const desc =
         error?.response?.data?.message ?? "Something went wrong on the server.";
+
       setAlert({
         header: "Something went wrong.",
         desc,
@@ -95,44 +97,15 @@ const SignUpPage = () => {
     }
   };
 
-  useEffect(() => {
 
-    async function checkUser() {
-
-      const user = localStorage.getItem('user')
-      if(user) {
-        const {id} = await JSON.parse(user)
-        router.push(`/${id}`)
-      }
-    }
-    checkUser()
-  }, [])
 
   return (
-    <main className="my-10 flex flex-col items-center mx-2 sm:mx-auto  px-4">
-      <section className="my-10 w-full max-w-96">
-        <div className="w-full py-8 px-5 border flex flex-col gap-5 rounded-lg">
+    <main className="flex flex-col items-center my-10 mx-auto px-5">
+      <section className="my-10 w-96">
+        <div className="py-8 px-5 border flex flex-col gap-5 rounded-lg">
           <h1 className=" text-center mb-5 text-xl font-bold">
-            Create your Account
+            Log In to your Account
           </h1>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="name" className="text-xs font-bold">
-              Name:
-            </Label>
-            <Input
-              value={user.name}
-              onChange={handleName}
-              id="name"
-              name="name"
-              className="w-full"
-              type="name"
-              placeholder="Jhon Wick"
-            />
-            {errors.name && (
-              <p className="text-xs text-red-700">{errors.name}</p>
-            )}
-          </div>
-
           <div className="flex flex-col gap-2">
             <Label htmlFor="email" className="text-xs font-bold">
               Email:
@@ -167,29 +140,31 @@ const SignUpPage = () => {
             )}
           </div>
           <div className="text-xs font-medium">
-            <span>Already have an account? Log In</span>{" "}
+            <span>Don&apos;t have an account? Sign Up </span>{" "}
             <Link
               className="underline font-bold text-primary-accent"
-              href="/login"
+              href="/signup"
             >
               here.
             </Link>
           </div>
-
           <AuthButton
-            text={"Sign Up"}
+            text="Sign In"
+            handleSubmit={submit}
             disabled={
               Object.values(errors).some((error) => error?.length !== 0) ||
               Object.values(user).some((value) => value?.length === 0) ||
               loading
             }
             loading={loading}
-            handleSubmit={submit}
           />
+          <a href='https://www.facebook.com/v19.0/dialog/oauth?client_id=2657638891061414&redirect_uri=http://localhost:3000/api/auth&state="{st=state123abc,ds=123456789}"}'>
+            Hellooooooooooo
+          </a>
         </div>
       </section>
     </main>
   );
 };
 
-export default SignUpPage;
+export default SignInPage;
