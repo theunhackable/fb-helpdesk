@@ -1,17 +1,18 @@
+'use client'
+import { userContext } from "@/providers/user-provider";
 import Link from "next/link";
-import React from "react";
+import React, { useContext, useEffect } from "react";
+import NavMenu from "./NavMenu";
 
 const Navbar = () => {
+
   return (
     <nav className="py-3 px-5 sticky top-0 bg-primary-accent text-white">
       <div className="flex items-center justify-between mx-auto max-w-[1000px]">
-        <Link href='/' className="text-lg font-extrabold">FB Help Desk</Link>
-        <menu className="text-xs font-semibold">
-          <ul className="flex gap-2">
-            <li> <Link className=" hover:underline" href='/login'>Log In </Link></li>
-            <li><Link className=" hover:underline" href='/signup'>Sign Up</Link></li>
-          </ul>
-        </menu>
+        <Link href="/" className="text-lg font-bold">
+          FB Help Desk
+        </Link>
+        <NavMenu />
       </div>
     </nav>
   );
