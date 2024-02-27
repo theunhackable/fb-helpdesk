@@ -3,6 +3,9 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/menus/Navbar";
 import Sidebar from "@/components/menus/Sidebar";
+import { AlertProvider } from "@/providers/alert-provider";
+import FBAlert from "@/components/alerts/Alert";
+import UserProvider from "@/providers/user-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,23 +19,28 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const isLoggedIn = true;
+  const isLoggedIn = false;
   return (
     <html lang="en">
       <body className={inter.className}>
-        {isLoggedIn ? (
-          <div className="flex gap-5">
-            <aside className=" fixed top-0 z-50 w-20 h-screen max-h-screen overflow-hidden">
-              <Sidebar />
-            </aside>
-            {children}
-          </div>
-        ) : (
-          <>
-            <Navbar />
-            {children}
-          </>
-        )}
+        <UserProvider>
+          <AlertProvider>
+            {isLoggedIn ? (
+              <div className="flex gap-5">
+                <aside className=" fixed top-0 z-50 w-20 h-screen max-h-screen overflow-hidden">
+                  <Sidebar />
+                </aside>
+                {children}
+              </div>
+            ) : (
+              <>
+                <Navbar />
+                {children}
+              </>
+            )}
+            <FBAlert />
+          </AlertProvider>
+        </UserProvider>
       </body>
     </html>
   );
