@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     );
   } catch (error: any) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ message: error.errors }, { status: 400 });
+      return NextResponse.json({ message: 'Please fill the form correctly.' }, { status: 400 });
     } else {
       return NextResponse.json({ message: error.message }, { status: 500 });
     }

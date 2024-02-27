@@ -7,6 +7,7 @@ import User from "@/models/user";
 import bcryptjs from "bcryptjs";
 import { connectMongoose, disconnectMongoose } from "@/lib/mongoose-helper";
 import jwt from "jsonwebtoken";
+import { createToken } from "@/lib/auth-helper";
 export async function GET() {
   redirect("/signin");
 }
@@ -33,24 +34,21 @@ export async function POST(req: NextRequest) {
         { status: 401 }
       );
     // if password matched sign a jwt token and send it to the user
-    const jwtSecret = process.env.JWT_SECRET as string;
-    const token = jwt.sign(
-      { id: user._id, name: user.name, email: user.email, code: user.code },
-      jwtSecret,
-      { expiresIn: "1d" }
-    );
-    return NextResponse.json({
+
+    const token = await createToken(user);
+    
+    const res = NextResponse.json({
       message: "Logged in successfully.",
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      code: user.code,
-      token,
     });
+    
+    res.cookies.set('token', token, {httpOnly: true})
+    
+    return res;
+    
   } catch (error) {
     console.log(error);
     if (error instanceof z.ZodError)
-      return NextResponse.json({ error: error.errors }, { status: 400 });
+      return NextResponse.json({ error: 'Missing form values' }, { status: 400 });
     else return NextResponse.json({ error: "Internal error" }, { status: 500 });
   } finally {
     await disconnectMongoose();
